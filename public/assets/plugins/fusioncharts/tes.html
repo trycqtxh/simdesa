@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>My First Column 3D chart</title>
+<script type="text/javascript" src="js/fusioncharts.js"></script>
+<script type="text/javascript" src="js/themes/fusioncharts.theme.fint.js"></script>
+<script type="text/javascript">
+
+FusionCharts.ready(function () {
+    var revenueChart = new FusionCharts({
+        "type": "mscolumn3d",
+        "renderAt": "chartContainer",
+        "width": "500",
+        "height": "300",
+        "dataFormat": "json",
+        "dataSource":  {
+            "chart": {
+                "caption": "Sales in Last Two Years",
+                "subCaption": "Quarter-wise comparison",
+                "xAxisName": "Quarter",
+                "yAxisName": "Sales (In USD)",
+                "numberPrefix": "$",
+                "theme": "fint"
+            },
+
+            "categories": [{
+                "category": [{
+                    "label": "Q1"
+                }, {
+                    "label": "Q2"
+                }, {
+                    "label": "Q3"
+                }, {
+                    "label": "Q4"
+                }]
+            }],
+            "dataset": [{
+                "seriesname": "Previous Year",
+                "data": [{
+                    "value": "10000"
+                }, {
+                    "value": "11500"
+                }, {
+                    "value": "12500"
+                }, {
+                    "value": "15000"
+                }]
+            }, {
+                "seriesname": "Current Year",
+                "data": [{
+                    "value": "25400"
+                }, {
+                    "value": "29800"
+                }, {
+                    "value": "21800"
+                }, {
+                    "value": "26800"
+                }]
+            }]
+        }
+    });
+
+    revenueChart.render();
+	
+	var demographicsChart = new FusionCharts({
+        "type": "pie3d",
+        "renderAt": "chartContainer2",
+        "width": "500",
+        "height": "300",
+        "dataFormat": "json",
+        "dataSource": {
+            "chart": {
+                "caption": "Age profile of website visitors",
+                "subCaption": "Last Year",
+                "startingAngle": "120",
+                "showLabels": "0",
+                "showLegend": "1",
+                "enableMultiSlicing": "0",
+                "slicingDistance": "15",
+
+                //To show the values in percentage
+                "showPercentValues": "1",
+                "showPercentInTooltip": "0",
+                "plotTooltext": "Age group : $label<br>Total visit : $datavalue",
+                "theme": "fint"
+            },
+            "data": [{
+                "label": "Teenage",
+                "value": "1250400"
+            }, {
+                "label": "Adult",
+                "value": "1463300"
+            }, {
+                "label": "Mid-age",
+                "value": "1050700"
+            }, {
+                "label": "Senior",
+                "value": "491000"
+            }]
+        }
+    });
+
+    demographicsChart.render();
+
+});
+
+
+</script>
+</head>
+<body>
+  <div id="chartContainer">A column 3D chart will load here!</div>
+  <div id="chartContainer2">A column 3D chart will load here!</div>
+</body>
+</html>

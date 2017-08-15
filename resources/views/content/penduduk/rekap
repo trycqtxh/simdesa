@@ -1,0 +1,532 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Criteria\BalitaCriteria;
+use App\Criteria\BelajarCriteria;
+use App\Criteria\PemiluCriteria;
+use App\Entities\AnggotaKeluarga;
+use App\Entities\RT;
+use App\Entities\RW;
+use App\Presenters\KelompokPendudukPresenter;
+use App\Repositories\PendudukRepository;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Entities\Penduduk;
+use App\Http\Requests;
+use Illuminate\Support\Facades\DB;
+
+
+class PendudukController extends Controller
+{
+    protected $repository;
+
+    public function __construct(PendudukRepository $repository){
+        $this->repository = $repository;
+    }
+
+    public function anggotaKeluarga()
+    {
+        return view('content.penduduk.anggota-keluarga');
+    }
+
+    public function rekapitulasi()
+    {
+        $rw = RW::all();
+        $i = 1;
+        $awal_bulan = Carbon::today()->firstOfMonth()->subDays(1)->format('Y-m-d');
+        $akhir_bulan = Carbon::today()->endOfMonth()->format('Y-m-d');
+        $raw = DB::raw('count(*) as value, kewarga_negaraan, jenis_kelamin');
+        return $jml_awal_bulan = DB::table('r_ws as rw')
+            ->select($raw)
+            ->join('penduduk_induk as i', 'i.rw_id', '=', 'rw.id')
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->groupBy('kewarga_negaraan')
+            ->groupBy('jenis_kelamin')
+            ->where('rw.id', 1)
+            ->where('tanggal_lahir', '<', $awal_bulan)
+            ->get();
+
+
+        if(request()->wantsJson()){
+            $table = [];
+            $rw = RW::all();
+            $i = 1;
+            $awal_bulan = Carbon::today()->firstOfMonth()->subDays(1)->format('Y-m-d');
+            $akhir_bulan = Carbon::today()->endOfMonth()->format('Y-m-d');
+
+            foreach($rw as $wr){
+                $row_rw = [];
+                $row_rw['no'] = $i++;
+                $row_rw['nama_rw'] = 'RW '.$wr->nama;
+
+                // WNA L
+                $jml_wna_l = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+                    ->has('mutasiMatis', '=', 0)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->where('jenis_kelamin', 'L')
+                    ->where('kewarga_negaraan', 'WNA')
+                    ->withCount('pendudukInduks')
+                    ->count();
+
+                $jml_awal_bulan = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->whereHas('mutasiMasuks', function($q) use($awal_bulan){
+                        $q->where('tanggal', '<', $awal_bulan);
+                    })
+                    ->where('jenis_kelamin', 'L')
+                    ->where('kewarga_negaraan', 'WNA')
+                    ->withCount('pendudukInduks')
+                    ->count();
+
+                $jml_wna_l = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+//                    ->has('mutasiMatis', '=', 0)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->whereHas('mutasiMasuks', function($q) use($awal_bulan){
+                        $q->where('tanggal', '<', $awal_bulan);
+                    })
+                    ->where('jenis_kelamin', 'L')
+                    ->where('kewarga_negaraan', 'WNA')
+                    ->withCount('pendudukInduks')
+                    ->count();
+
+                //END WNA L
+                $jml_wna_p = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+                    ->has('mutasiMatis', '=', 0)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->where('jenis_kelamin', 'P')
+                    ->where('kewarga_negaraan', 'WNA')
+                    ->withCount('pendudukInduks')
+                    ->count();
+
+                //WNI L
+                $jml_wni_l = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+                    ->has('mutasiMatis', '=', 0)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->where('jenis_kelamin', 'L')
+                    ->where('kewarga_negaraan', 'WNI')
+                    ->count();
+                $jml_wni_l = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->whereHas('mutasiMasuks', function($q) use($awal_bulan){
+                        $q->where('tanggal', '<', $awal_bulan);
+                    })
+                    ->where('jenis_kelamin', 'L')
+                    ->where('kewarga_negaraan', 'WNI')
+                    ->count();
+                //End WNI L
+
+                $jml_wni_p = Penduduk::where('tanggal_lahir', '<', $awal_bulan)
+                    ->has('mutasiMatis', '=', 0)
+                    ->whereHas('pendudukInduks', function($q) use($wr){
+                        $q->where('rw_id', $wr->id);
+                    })
+                    ->where('jenis_kelamin', 'P')
+                    ->where('kewarga_negaraan', 'WNI')
+                    ->withCount('pendudukInduks')
+                    ->count();
+
+                $row_rw['awal_bulan_wna_l'] = $jml_wna_l;
+                $row_rw['awal_bulan_wna_p'] = $jml_wna_p;
+                $row_rw['awal_bulan_wni_l'] = $jml_wni_l;
+                $row_rw['awal_bulan_wni_p'] = $jml_wni_p;
+
+                $jml_kk = Penduduk::whereHas('pendudukInduks', function($q) use($wr){
+                    $q->whereHas('statusKeluarga', function($query){
+                        $query->where('kode', 'KK');
+                    })
+                    ->where('rw_id', $wr->id);
+                })->withCount('pendudukInduks')
+                    ->where('tanggal_lahir', '<', $awal_bulan)
+                    ->count();
+                $jml_a_kk = Penduduk::whereHas('pendudukInduks', function($q) use($wr){
+                    $q->whereHas('statusKeluarga', function($query){
+                        $query->where('kode', '<>', 'KK');
+                    })
+                    ->where('rw_id', $wr->id);
+                })->withCount('pendudukInduks')
+                    ->where('tanggal_lahir', '<', $awal_bulan)
+                    ->count();
+
+                $row_rw['awal_bulan_jml_kk'] = $jml_kk;
+                $row_rw['awal_bulan_jml_anggota_kk'] = $jml_a_kk;
+                $row_rw['awal_bulan_jml_jiwa'] = $jml_kk+$jml_a_kk;
+
+                $row_rw['tambah_bulan_wna_lahir_l'] = $awal_bulan;
+                $row_rw['tambah_bulan_wna_lahir_p'] = '';
+                $row_rw['tambah_bulan_wni_lahir_l'] = '';
+                $row_rw['tambah_bulan_wni_lahir_p'] = '';
+                $row_rw['tambah_bulan_wna_datang_l'] = '';
+                $row_rw['tambah_bulan_wna_datang_p'] = '';
+                $row_rw['tambah_bulan_wni_datang_l'] = '';
+                $row_rw['tambah_bulan_wni_datang_p'] = '';
+
+                $row_rw['kurang_bulan_wna_meninggal_l'] = '';
+                $row_rw['kurang_bulan_wna_meninggal_p'] = '';
+                $row_rw['kurang_bulan_wni_meninggal_l'] = '';
+                $row_rw['kurang_bulan_wni_meninggal_p'] = '';
+                $row_rw['kurang_bulan_wna_pindah_l'] = '';
+                $row_rw['kurang_bulan_wna_pindah_p'] = '';
+                $row_rw['kurang_bulan_wni_pindah_l'] = '';
+                $row_rw['kurang_bulan_wni_pindah_p'] = '';
+
+                $row_rw['akhir_bulan_wna_l'] = '';
+                $row_rw['akhir_bulan_wna_p'] = '';
+                $row_rw['akhir_bulan_wni_l'] = '';
+                $row_rw['akhir_bulan_wni_p'] = '';
+                $row_rw['akhir_bulan_jml_kk'] = '';
+                $row_rw['akhir_bulan_jml_anggota_kk'] = '';
+                $row_rw['akhir_bulan_jml_jiwa'] = '';
+                $row_rw['keterangan'] = '';
+                $table[] = $row_rw;
+            }
+
+            return response()->json([
+                'data' => $table
+            ], 200);
+        }
+        return view('content.penduduk.rekapitulasi');
+    }
+
+    public function grafikPendidikan()
+    {
+        $pendidikan['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Pendidikan ",
+        ];
+        $pendidikan['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, i.pendidikan as label'))
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $pendidikan['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('i.pendidikan as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        return view('content.penduduk.grafik.pendidikan', compact('pendidikan'));
+
+    }
+
+    public function grafikAgama()
+    {
+        $agama['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Agama",
+        ];
+        $agama['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, i.agama as label'))
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $agama['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('i.agama as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+
+        return view('content.penduduk.grafik.agama', compact('agama'));
+    }
+
+    public function grafikPekerjaan()
+    {
+        $pekerjaan['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Pekerjaan",
+        ];
+        $pekerjaan['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, pek.nama as label'))
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->leftJoin('pekerjaan as pek', 'i.pekerjaan_id', '=', 'pek.id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $pekerjaan['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('pek.nama as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('pekerjaan as pek', 'i.pekerjaan_id', '=', 'pek.id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        return view('content.penduduk.grafik.pekerjaan', compact('pekerjaan'));
+    }
+    public function grafikKelompokUmur()
+    {
+
+        $today = Carbon::today()->toDateString();
+        $balita_akhir= Carbon::today()->subYear(5)->toDateString();
+        $anak_akhir = Carbon::today()->subYear(11)->toDateString();
+        $remaja_awal_akhir = Carbon::today()->subYear(16)->toDateString();
+        $remaja_akhir_akhir = Carbon::today()->subYear(25)->toDateString();
+        $dewasa_awal_akhir = Carbon::today()->subYear(35)->toDateString();
+        $dewasa_akhir_akhir = Carbon::today()->subYear(45)->toDateString();
+        $lansia_awal_akhir = Carbon::today()->subYear(55)->toDateString();
+        $lansia_akhir_akhir = Carbon::today()->subYear(65)->toDateString();
+        $manula = Carbon::today()->subYear(120)->toDateString();
+
+        $umur['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Umur",
+        ];
+        //Umur
+        $grafikumur = DB::raw("
+            CASE
+                WHEN p.tanggal_lahir BETWEEN '$balita_akhir' AND '$today' THEN '0-5 Balita'
+                WHEN p.tanggal_lahir BETWEEN '$anak_akhir' AND '$balita_akhir' THEN '06-11 Kanak-kanak'
+                WHEN p.tanggal_lahir BETWEEN '$remaja_awal_akhir' AND '$anak_akhir' THEN '12-16 Remaja Awal'
+                WHEN p.tanggal_lahir BETWEEN '$remaja_akhir_akhir' AND '$remaja_awal_akhir' THEN '17-25 Remaja Akhir'
+                WHEN p.tanggal_lahir BETWEEN '$dewasa_awal_akhir' AND '$remaja_akhir_akhir' THEN '26-35 Dewasa Awal'
+                WHEN p.tanggal_lahir BETWEEN '$dewasa_akhir_akhir' AND '$dewasa_awal_akhir' THEN '36-45 Dewasa Akhir'
+                WHEN p.tanggal_lahir BETWEEN '$lansia_awal_akhir' AND '$dewasa_akhir_akhir' THEN '46-55 Lansia Awal'
+                WHEN p.tanggal_lahir BETWEEN '$lansia_akhir_akhir' AND '$lansia_awal_akhir' THEN '56-65 Lansia Akhir'
+                WHEN p.tanggal_lahir <= '$lansia_akhir_akhir' THEN '>= 65 Manula'
+                WHEN p.tanggal_lahir IS NULL THEN '(NULL)'
+            END AS label,
+            COUNT(*) as value
+        ");
+
+        $umur['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select($grafikumur)
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+
+        $tabelumur = DB::raw("
+            CASE
+                WHEN p.tanggal_lahir BETWEEN '$balita_akhir' AND '$today' THEN '0-5 Balita'
+                WHEN p.tanggal_lahir BETWEEN '$anak_akhir' AND '$balita_akhir' THEN '06-11 Kanak-kanak'
+                WHEN p.tanggal_lahir BETWEEN '$remaja_awal_akhir' AND '$anak_akhir' THEN '12-16 Remaja Awal'
+                WHEN p.tanggal_lahir BETWEEN '$remaja_akhir_akhir' AND '$remaja_awal_akhir' THEN '17-25 Remaja Akhir'
+                WHEN p.tanggal_lahir BETWEEN '$dewasa_awal_akhir' AND '$remaja_akhir_akhir' THEN '26-35 Dewasa Awal'
+                WHEN p.tanggal_lahir BETWEEN '$dewasa_akhir_akhir' AND '$dewasa_awal_akhir' THEN '36-45 Dewasa Akhir'
+                WHEN p.tanggal_lahir BETWEEN '$lansia_awal_akhir' AND '$dewasa_akhir_akhir' THEN '46-55 Lansia Awal'
+                WHEN p.tanggal_lahir BETWEEN '$lansia_akhir_akhir' AND '$lansia_awal_akhir' THEN '56-65 Lansia Akhir'
+                WHEN p.tanggal_lahir <= '$lansia_akhir_akhir' THEN '>= 65 Manula'
+                WHEN p.tanggal_lahir IS NULL THEN '(NULL)'
+            END AS label,
+            SUM(IF(jenis_kelamin = 'L', 1, 0)) as jumlah_laki,
+            SUM(IF(jenis_kelamin = 'P', 1, 0)) as jumlah_perempuan,
+            COUNT(*) as total
+        ");
+        $umur['table'] = DB::table('penduduk_induk AS i')
+            ->select($tabelumur)
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+
+        return view('content.penduduk.grafik.kelompok-umur', compact('umur'));
+    }
+    public function grafikDusun()
+    {
+        $dusun['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan RW",
+        ];
+        $dusun['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, r.nama as label'))
+            ->join('r_ws as r', 'r.id', '=', 'i.rw_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $dusun['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('r.nama as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->join('r_ws as r', 'r.id', '=', 'i.rw_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        return view('content.penduduk.grafik.dusun', compact('dusun'));
+    }
+    public function grafikStatusPerkawinan()
+    {
+        $kawin['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Status Perkawinan",
+        ];
+        $kawin['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, i.status_perkawinan as label'))
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $kawin['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('i.status_perkawinan as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+
+        return view('content.penduduk.grafik.status-perkawinan', compact('kawin'));
+    }
+    public function grafikKewargaNegaraan()
+    {
+        $warga['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Kewarganegaraan",
+        ];
+        $warga['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, kewarga_negaraan as label'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $warga['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('kewarga_negaraan as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+
+        return view('content.penduduk.grafik.kewarganegaraan', compact('warga'));
+    }
+
+    public function grafikStatusKeluarga()
+    {
+        $keluarga['grafik']['chart'] = [
+            "startingAngle"=> "120",
+            "showLabels"=> "0",
+            "showLegend"=> "1",
+            "enableMultiSlicing"=> "0",
+            "slicingDistance"=> "15",
+            "showPercentValues"=> "1",
+            "showPercentInTooltip"=> "0",
+            "plotTooltext"=> "Kategori : \$label<br>Banyak : \$datavalue",
+            "caption"=> "Grafik Penduduk Berdasarkan Status Keluarga",
+        ];
+        $keluarga['grafik']['data'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('count(*) as value, s.nama as label'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('status_keluarga as s', 'i.status_keluarga_id', '=', 's.id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+        $keluarga['table'] = DB::table('penduduk_induk AS i')
+            ->select(DB::RAW('s.nama as label, SUM(IF(jenis_kelamin = "L", 1, 0)) as jumlah_laki, SUM(IF(jenis_kelamin = "P", 1, 0)) as jumlah_perempuan ,count(*) as total'))
+            ->join('penduduk as p', 'p.id', '=', 'i.penduduk_id')
+            ->leftJoin('status_keluarga as s', 'i.status_keluarga_id', '=', 's.id')
+            ->leftJoin('penduduk_mutasi as m', 'i.penduduk_id', '=', 'm.penduduk_id')
+            ->whereNull('m.penduduk_id')
+            ->groupBy('label')
+            ->get();
+
+        return view('content.penduduk.grafik.status-keluarga', compact('keluarga'));
+    }
+
+    //-------------------------------------------------------------------------------------------------------------
+    public function balita()
+    {
+        if(request()->wantsJson()){
+            $data = $this->repository
+                ->pushCriteria(BalitaCriteria::class)
+                ->setPresenter(KelompokPendudukPresenter::class)
+                ->all();
+            return response()->json($data, 200);
+        }
+
+        return view('content.penduduk.kelompok.balita');
+    }
+
+    public function belajar()
+    {
+        if(request()->wantsJson()){
+            $data = $this->repository
+                ->pushCriteria(BelajarCriteria::class)
+                ->setPresenter(KelompokPendudukPresenter::class)
+                ->all();
+            return response()->json($data, 200);
+        }
+        return view('content.penduduk.kelompok.belajar');
+    }
+
+    public function pemilu()
+    {
+        if(request()->wantsJson()){
+            $data = $this->repository
+                ->pushCriteria(PemiluCriteria::class)
+                ->setPresenter(KelompokPendudukPresenter::class)
+                ->all();
+            return response()->json($data, 200);
+        }
+
+        return view('content.penduduk.kelompok.pemilu');
+    }
+
+}

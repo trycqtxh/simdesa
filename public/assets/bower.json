@@ -1,0 +1,34 @@
+{
+  "name": "bsm",
+  "authors": [
+    "Faisal Abdul Hamid <faisal.abdulhamid@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "datatables.net": "^1.10.12",
+    "datatables.net-dt": "^1.10.12",
+    "datatables.net-autofill-dt": "^2.1.2",
+    "datatables.net-colreorder-dt": "^1.3.2",
+    "datatables.net-buttons-dt": "^1.2.2",
+    "datatables.net-fixedcolumns-dt": "^3.2.2",
+    "datatables.net-fixedheader-dt": "^3.1.2",
+    "datatables.net-keytable-dt": "^2.1.3",
+    "datatables.net-responsive-dt": "^2.1.0",
+    "datatables.net-select": "^1.2.0",
+    "datatables.net-select-dt": "^1.2.0",
+    "brain-socket-js": "https://github.com/BrainBoxLabs/brain-socket-js.git",
+    "datatables.net-scroller": "^1.4.2",
+    "datatables.net-scroller-dt": "^1.4.2"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "brain-socket-js",
+  "homepage": "https://github.com/BrainBoxLabs/brain-socket-js",
+  "_release": "31457e8a2e",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "31457e8a2e45c577da36f2b0b9ef0494ac65ffd4"
+  },
+  "_source": "https://github.com/BrainBoxLabs/brain-socket-js.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/BrainBoxLabs/brain-socket-js.git",
+  "_direct": true
+}

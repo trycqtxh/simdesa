@@ -1,0 +1,114 @@
+table thead .tabel-dinamis{
+
+}
+
+table > thead > tr > th {
+    padding-right: 5px;
+    padding-left: 5px;
+    vertical-align: middle;
+    text-align: center;
+}
+table.dataTable thead > tr > th{
+    padding-right: 5px;
+    padding-left: 5px;
+    vertical-align: middle;
+    text-align: center;
+}
+table:nth-child(1) > thead:nth-child(1) > tr:nth-child(3) > th {
+    padding-top: 0px;
+    padding-bottom: 3px;
+}
+
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th{
+    padding: 4px;
+    border: 1px solid #c9c9c9;
+}
+.table-rpjm > tbody > tr > td,
+.table-rpjm > tbody > tr > th,
+.table-rpjm > tfoot > tr > td,
+.table-rpjm > tfoot > tr > th,
+.table-rpjm > thead > tr > td,
+.table-rpjm > thead > tr > th{
+    padding: 4px;
+    border: 1px solid #ab8a8a;
+}
+#top-header {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f2f5f6+0,e3eaed+37,c8d7dc+100;Grey+3D+%234 */
+
+    background: rgba(16,100,203,1);
+    background: -moz-linear-gradient(top, rgba(16,100,203,1) 0%, rgba(16,100,203,1) 25%, rgba(86,142,211,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(16,100,203,1)), color-stop(25%, rgba(16,100,203,1)), color-stop(100%, rgba(86,142,211,1)));
+    background: -webkit-linear-gradient(top, rgba(16,100,203,1) 0%, rgba(16,100,203,1) 25%, rgba(86,142,211,1) 100%);
+    background: -o-linear-gradient(top, rgba(16,100,203,1) 0%, rgba(16,100,203,1) 25%, rgba(86,142,211,1) 100%);
+    background: -ms-linear-gradient(top, rgba(16,100,203,1) 0%, rgba(16,100,203,1) 25%, rgba(86,142,211,1) 100%);
+    background: linear-gradient(to bottom, rgba(16,100,203,1) 0%, rgba(16,100,203,1) 25%, rgba(86,142,211,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1064cb', endColorstr='#568ed3', GradientType=0 );
+
+
+
+
+
+}
+
+#top-logo {
+    padding:10px;
+    font-size:20px;
+
+    line-height:20px;
+}
+img.top-img{
+    margin-left:10px;
+    margin-right:10px;
+    height: 85px;
+    float: left;
+}
+#top-kata{
+    height:65px;display:inline;
+}
+#top-kata h1{
+    margin-top: 10px;
+    font-weight: 800;
+}
+#top-kata h5{
+    margin-top: 10px;
+    font-weight: 800;
+}
+
+/*
+Loading
+*/
+.se-pre-con {
+    display: none;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url('../img/loading/loader-128x/Preloader_7.gif') center no-repeat #fff;
+}
+
+#scroll-notif{
+    font-size: 10px
+}
+
+.loading{
+    position: fixed;
+    background: rgba(255, 255, 255, 0.7);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1200;
+    display: none;
+}
+.loading > img{
+    top: 35%;
+    left: 37%;
+    position: absolute;
+}
